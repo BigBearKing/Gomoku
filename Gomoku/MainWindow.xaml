@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Gomoku.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Gomoku"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="五子棋">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid Background="Transparent">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="290" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============ LEFT: Board Area ============ -->
+        <Grid Grid.Column="0"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Margin="0,0,4,0">
+
+            <!-- Board shadow -->
+            <Border CornerRadius="4"
+                    Background="#20000000"
+                    Margin="6,6,0,0" />
+
+            <!-- Board frame -->
+            <Border x:Name="BoardBorder"
+                    CornerRadius="4"
+                    Background="#FFDEB887"
+                    BorderBrush="#FFB8860B"
+                    BorderThickness="4"
+                    Width="564"
+                    Height="564">
+                <Canvas x:Name="BoardCanvas"
+                        Width="564"
+                        Height="564" />
+            </Border>
+        </Grid>
+
+        <!-- ============ RIGHT: Control Panel ============ -->
+        <ScrollViewer Grid.Column="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="0,16,12,16">
+            <StackPanel Spacing="12">
+
+                <!-- Title -->
+                <TextBlock Text="五子棋"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                <!-- Mode Selection -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Padding="16,12">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="游戏模式"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <RadioButtons x:Name="GameModeSelector"
+                                      SelectionChanged="GameMode_SelectionChanged">
+                            <RadioButton Content="双人对战"
+                                         Tag="PvP"
+                                         IsChecked="True" />
+                            <RadioButton Content="人机对战"
+                                         Tag="PvAI" />
+                        </RadioButtons>
+                    </StackPanel>
+                </Border>
+
+                <!-- Difficulty Selection -->
+                <Border x:Name="DifficultyPanel"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Padding="16,12"
+                        Visibility="Collapsed">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="AI 难度"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <ComboBox x:Name="DifficultyCombo"
+                                  SelectedIndex="2"
+                                  SelectionChanged="Difficulty_SelectionChanged">
+                            <ComboBoxItem Tag="Beginner">入门 — 适合新手</ComboBoxItem>
+                            <ComboBoxItem Tag="Easy">初级 — 基本策略</ComboBoxItem>
+                            <ComboBoxItem Tag="Medium">中级 — 中等挑战</ComboBoxItem>
+                            <ComboBoxItem Tag="Hard">高级 — 需要技巧</ComboBoxItem>
+                            <ComboBoxItem Tag="Master">大师 — 极限挑战</ComboBoxItem>
+                        </ComboBox>
+                        <!-- Star rating -->
+                        <StackPanel x:Name="DifficultyStars"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Spacing="2" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Score & Status -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Padding="16,12">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="比分"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <Grid ColumnDefinitions="*,Auto,*"
+                              RowDefinitions="Auto,Auto,Auto">
+                            <Ellipse Grid.Column="0"
+                                     Grid.Row="0"
+                                     Width="36" Height="36"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     Margin="0,4,0,0">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush GradientOrigin="0.35,0.35">
+                                        <GradientStop Color="#FF555555" Offset="0" />
+                                        <GradientStop Color="#FF111111" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock Grid.Column="1"
+                                       Grid.Row="0"
+                                       Text="VS"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <Ellipse Grid.Column="2"
+                                     Grid.Row="0"
+                                     Width="36" Height="36"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     Margin="0,4,0,0">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush GradientOrigin="0.35,0.35">
+                                        <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                        <GradientStop Color="#FFCCCCCC" Offset="1" />
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock x:Name="BlackScoreText"
+                                       Grid.Column="0"
+                                       Grid.Row="1"
+                                       Text="0 胜"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="1"
+                                       Grid.Row="1"
+                                       Text=":"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="WhiteScoreText"
+                                       Grid.Column="2"
+                                       Grid.Row="1"
+                                       Text="0 胜"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center" />
+                            <!-- Current turn indicator -->
+                            <TextBlock x:Name="StatusText"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="3"
+                                       Grid.Row="2"
+                                       Text="黑方落子"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,12,0,0"
+                                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Action Buttons -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Padding="16,12">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="操作"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <Button x:Name="NewGameButton"
+                                Content="新游戏"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                Click="NewGame_Click" />
+                        <Button x:Name="UndoButton"
+                                Content="悔棋"
+                                Click="Undo_Click" />
+                        <Button x:Name="RedoButton"
+                                Content="撤销悔棋"
+                                IsEnabled="False"
+                                Click="Redo_Click" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Move History -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Padding="16,12"
+                        MaxHeight="200">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="棋谱"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+                        <ListView x:Name="MoveHistoryList"
+                                  Height="160"
+                                  SelectionMode="None"
+                                  IsItemClickEnabled="False" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Gomoku (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Gomoku (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
