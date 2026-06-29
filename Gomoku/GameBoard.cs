@@ -30,6 +30,26 @@ public class GameBoard
 
     public Move? LastMove => _moveHistory.Count > 0 ? _moveHistory.Peek() : null;
 
+    /// <summary>All moves in chronological order (oldest first).</summary>
+    public IEnumerable<Move> Moves
+    {
+        get
+        {
+            var list = _moveHistory.ToArray();
+            Array.Reverse(list);
+            return list;
+        }
+    }
+
+    /// <summary>Whether Renju forbidden-move rules (禁手) are enforced for Black.</summary>
+    public bool UseForbiddenRules { get; set; } = false;
+
+    /// <summary>When a forbidden-move attempt is rejected, this contains the reason.</summary>
+    public string? LastForbiddenReason { get; set; } = null;
+
+    /// <summary>Event raised when a forbidden move is attempted.</summary>
+    public event Action<string>? ForbiddenMoveAttempted;
+
     public GameBoard()
     {
         Board = new Player[Size, Size];
@@ -43,7 +63,8 @@ public class GameBoard
             CurrentPlayer = CurrentPlayer,
             IsGameOver = IsGameOver,
             Winner = Winner,
-            WinningCells = WinningCells
+            WinningCells = WinningCells,
+            UseForbiddenRules = UseForbiddenRules
         };
         return clone;
     }
@@ -53,6 +74,19 @@ public class GameBoard
         if (IsGameOver) return null;
         if (row < 0 || row >= Size || col < 0 || col >= Size) return null;
         if (Board[row, col] != Player.None) return null;
+
+        // Check forbidden moves for Black when rules are enabled
+        if (UseForbiddenRules && CurrentPlayer == Player.Black)
+        {
+            var (isForbidden, reason) = ForbiddenMoveChecker.CheckMove(Board, row, col);
+            if (isForbidden)
+            {
+                LastForbiddenReason = reason;
+                ForbiddenMoveAttempted?.Invoke(reason);
+                return null;
+            }
+        }
+        LastForbiddenReason = null;
 
         Board[row, col] = CurrentPlayer;
         var move = new Move(row, col, CurrentPlayer);
